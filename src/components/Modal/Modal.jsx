@@ -1,45 +1,51 @@
-import { Component } from 'react';
-import { Overlay, ModalImg } from './Modal.styled';
-import { createPortal } from 'react-dom';
+import css from './Modal.module.css'
+import { createPortal } from 'react-dom'
+import { Component } from 'react'
 import PropTypes from 'prop-types';
 
-const modalRoot = document.querySelector('#modal-root');
+const modalRoot = document.querySelector('#modal-root')
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
+// export default function Modal({ largeImage, onCloseModal }) {
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
+//     return createPortal(<div onClick={onCloseModal} className={css.Overlay}>
+//         <div className={css.Modal}>
+//             <img src={largeImage} alt="" />
+//         </div>
+//     </div>, modalRoot)
+// }
 
-  handleKeyDown = evt => {
-    if (evt.code === 'Escape') {
-      this.props.onModalClose();
+
+class Modal extends Component {
+
+    componentDidMount() {
+        window.addEventListener('keydown', this.handleKeyDown)
     }
-  };
 
-  handleOverlayClick = evt => {
-    if (evt.target === evt.currentTarget) {
-      this.props.onModalClose();
+    componentWillUnmount() {
+        window.removeEventListener('keydown', this.handleKeyDown)
     }
-  };
 
-  render() {
-    return createPortal(
-      <Overlay onClick={this.handleOverlayClick}>
-        <ModalImg>
-          <img src={this.props.imageURL} alt={this.props.imageTags} />
-        </ModalImg>
-      </Overlay>,
-      modalRoot
-    );
-  }
+    handleKeyDown = (evt) => {
+        if (evt.code === 'Escape') {
+            this.props.closeKeyDown()
+        }
+    }
+
+    render() {
+        const { largeImage, onCloseModal } = this.props
+
+        return createPortal(<div onClick={onCloseModal} className={css.Overlay}>
+            <div className={css.Modal}>
+                <img src={largeImage} alt="" />
+            </div>
+        </div>, modalRoot)
+    }
 }
 
 Modal.propTypes = {
-  onModalClose: PropTypes.func.isRequired,
-  imageURL: PropTypes.string.isRequired,
-  imageTags: PropTypes.string,
-};
+    largeImage: PropTypes.string.isRequired,
+    onCloseModal: PropTypes.func.isRequired,
+}
+
+export default Modal;
+

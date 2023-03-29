@@ -1,99 +1,66 @@
 import { Component } from 'react';
-import { Layout } from './Layout';
-import { GlobalStyle } from './GlobalStyle';
-import { Searchbar } from './Searchbar/Searchbar';
-import { getImages } from 'API/PixabayAPI';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Button } from './Button/Button';
-import { Loader } from './Loader/Loader';
-import { ToastContainer, toast } from 'react-toastify';
+import { animateScroll } from 'react-scroll';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import PropTypes from 'prop-types';
+import css from './App.module.css';
+import Loader from './Loader/Loader';
+import Button from './Button/Button';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Searchbar from './Searchbar/Searchbar';
+import fetchGallery from './FetchGallery';
 
-export class App extends Component {
+class App extends Component {
   state = {
-    images: [],
-    queryString: '',
+    gallery: {},
     page: 1,
-    isLoading: false,
-    error: null,
-    totalHits: 0,
+    collection: [],
+    loading: false,
   };
 
-  handleSubmit = evt => {
-    evt.preventDefault();
-    const queryString = evt.currentTarget.elements.search.value;
-    if (!queryString) {
-      toast('Enter search text');
-      return;
+  componentDidUpdate(_, prevState) {
+    const { search, page, collection } = this.state;
+
+    if (prevState.search !== search || prevState.page !== page) {
+      this.setState({ loading: true });
+
+      fetchGallery(search, page)
+        .then(response =>
+          this.setState(prevState => {
+            return {
+              gallery: response,
+              collection: [...prevState.collection, ...response.hits],
+            };
+          })
+        )
+        .finally(() => this.setState({ loading: false }));
     }
-    if (this.state.queryString !== queryString) {
-      this.setState({
-        images: [],
-        queryString: queryString,
-        page: 1,
-      });
-    }
-  };
 
-  handleLoadMore = () => {
-    this.setState({ page: this.state.page + 1 });
-  };
-
-  async componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.page !== this.state.page ||
-      prevState.queryString !== this.state.queryString
-    ) {
-      try {
-        this.setState({ isLoading: true });
-        const page = this.state.page;
-        const queryString = this.state.queryString;
-        const imagesObject = await getImages(queryString, page);
-        const imagesObjectFiltered = [];
-
-        imagesObject.hits.map(item => {
-          return imagesObjectFiltered.push({
-            id: item.id,
-            webformatURL: item.webformatURL,
-            largeImageURL: item.largeImageURL,
-            tags: item.tags,
-          });
-        });
-
-        this.setState(prevState => ({
-          images: [...prevState.images, ...imagesObjectFiltered],
-          totalHits: imagesObject.totalHits,
-        }));
-      } catch (error) {
-        this.setState({ error });
-      } finally {
-        this.setState({ isLoading: false });
-      }
+    if (prevState.collection !== collection && collection.length > 12) {
+      return animateScroll.scrollMore(650);
     }
   }
 
+  handleSearchSubmit = keyWords => {
+    this.setState({ search: keyWords, collection: [], page: 1 });
+  };
+
+  handleLoadMore = () => {
+    this.setState(prevState => {
+      return { page: prevState.page + 1 };
+    });
+  };
+
   render() {
+    const { loading, collection, page, gallery } = this.state;
+
     return (
-      <Layout>
-        <Searchbar handleSubmit={this.handleSubmit} />
-        {this.state.error && (
-          <p>
-            What is happening here anyway? Error: {this.state.error.message}
-          </p>
-        )}
+      <div className={css.App}>
+        <Searchbar keyWords={this.handleSearchSubmit} />
 
-        <ImageGallery imagesList={this.state.images} />
-
-        {this.state.images.length !== 0 &&
-          this.state.totalHits &&
-          this.state.images.length < this.state.totalHits && (
-            <Button handleLoadMore={this.handleLoadMore} />
-          )}
-
-        {this.state.isLoading && <Loader />}
         <ToastContainer
-          position="bottom-center"
-          autoClose={2000}
+          position="top-center"
+          autoClose={1000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
@@ -101,10 +68,26 @@ export class App extends Component {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
+          theme="dark"
         />
-        <GlobalStyle />
-      </Layout>
+
+        {collection && <ImageGallery collection={collection} />}
+
+        {loading && <Loader />}
+
+        {collection.length !== 0 &&
+          page < Math.ceil(gallery.totalHits / 12) && (
+            <Button incrimentPage={this.handleLoadMore} />
+          )}
+      </div>
     );
   }
 }
+
+App.propTypes = {
+  keyWords: PropTypes.func.isRequired,
+  collection: PropTypes.arrayOf(PropTypes.shape({}).isRequired).isRequired,
+  incrimentPage: PropTypes.func.isRequired,
+};
+
+export default App;
