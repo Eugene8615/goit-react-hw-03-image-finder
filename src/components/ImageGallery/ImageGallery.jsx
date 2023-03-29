@@ -1,8 +1,8 @@
 import ImageGalleryItem from "components/ImageGalleryItem/ImageGalleryItem";
-import css from './ImageGallery.module.css'
+import styles from './ImageGallery.module.css'
 
 export default function ImageGallery({ collection }) {
-    return <ul className={css.ImageGallery}>
+    return <ul className={styles.ImageGallery}>
         {collection.map(({ id, webformatURL, largeImageURL, user }) => {
             return <ImageGalleryItem key={id} image={webformatURL} largeImage={largeImageURL} alt={user} />
         })}

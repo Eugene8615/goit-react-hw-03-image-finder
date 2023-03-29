@@ -3,7 +3,7 @@ import { animateScroll } from 'react-scroll';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PropTypes from 'prop-types';
-import css from './App.module.css';
+import styles from './App.module.css';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -55,7 +55,7 @@ class App extends Component {
     const { loading, collection, page, gallery } = this.state;
 
     return (
-      <div className={css.App}>
+      <div className={styles.App}>
         <Searchbar keyWords={this.handleSearchSubmit} />
 
         <ToastContainer

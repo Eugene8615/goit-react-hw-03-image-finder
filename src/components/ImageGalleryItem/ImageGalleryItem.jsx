@@ -1,13 +1,7 @@
 import { Component } from 'react';
-import css from './ImageGalleryItem.module.css'
+import styles from './ImageGalleryItem.module.css'
 import Modal from '../Modal/Modal'
 
-// export default function ImageGalleryItem({ image, id, openModal }) {
-//     return <li onClick={openModal} className={css.ImageGalleryItem}>
-//         <img src={image} id={id} className={css.ImageGalleryItem__image} alt="" />
-//     </li >
-
-// }
 class ImageGalleryItem extends Component {
     state = {
         showModal: false,
@@ -31,8 +25,8 @@ class ImageGalleryItem extends Component {
 
         return (
 
-            <li className={css.ImageGalleryItem}>
-                <img onClick={this.toggleModal} src={image} id={id} className={css.ImageGalleryItem__image} alt={alt} />
+            <li className={styles.ImageGalleryItem}>
+                <img onClick={this.toggleModal} src={image} id={id} className={styles.ImageGalleryItem__image} alt={alt} />
                 {showModal && <Modal onCloseModal={this.handleCloseModal} closeKeyDown={this.toggleModal} largeImage={largeImage} />}
             </li >
 
